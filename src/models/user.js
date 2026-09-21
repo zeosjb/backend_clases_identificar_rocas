@@ -10,6 +10,10 @@ class User extends Model {
 }
 
 User.init({
+    roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     userName: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -41,6 +45,27 @@ User.prototype.toJSON = function () {
     const { password, ...user } = this.get()
     delete user.password
     return user
+}
+
+User.associate = (models) => {
+    User.belongsTo(models.Role, {
+        foreignKey: 'roleId',
+        as: 'role'
+    })
+    User.hasMany(models.Collection, {
+        foreignKey: 'userId',
+        as: 'collections'
+    })
+    User.hasMany(models.Analysis, {
+        foreignKey: 'userId',
+        as: 'analyses'
+    })
+    User.belongsToMany(models.Achievement, {
+        through: models.UserAchievement,
+        foreignKey: 'userId',
+        otherKey: 'achievementId',
+        as: 'achievements'
+    })
 }
 
 module.exports = User

@@ -24,6 +24,14 @@ class Rock extends Model {
 }
 
 Rock.init({
+    typeId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    categoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     index: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -106,6 +114,13 @@ Rock.init({
     timestamps: true,
     paranoid: true
 })
+
+Rock.associate = (models) => {
+    Rock.belongsTo(models.Type, { foreignKey: 'typeId', as: 'type' })
+    Rock.belongsTo(models.Category, { foreignKey: 'categoryId', as: 'category' })
+    Rock.hasMany(models.Collection, { foreignKey: 'rockId', as: 'collections' })
+    Rock.hasMany(models.Analysis, { foreignKey: 'rockId', as: 'analyses' })
+}
 
 Rock.prototype.toJSON = function () {
     const { ...rock } = this.get()

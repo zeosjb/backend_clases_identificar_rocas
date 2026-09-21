@@ -7,6 +7,13 @@ require("dotenv").config()
 const db = require('./config/database')
 const User = require('./models/user')
 const Rock = require("./models/rock")
+const Achievement = require('./models/achievement')
+const Analysis = require('./models/analysis')
+const Category = require('./models/category')
+const Collection = require('./models/collection')
+const Role = require('./models/role')
+const Type = require('./models/type')
+const UserAchievement = require('./models/userAchievement')
 
 class Server {
     constructor() {
@@ -43,6 +50,13 @@ class Server {
         // Carga de modelos a la base de datos
         await User.sync({ force: false })
         await Rock.sync({ force: false })
+        await Achievement.sync({force: false})
+        await Analysis.sync({force: false})
+        await Category.sync({force: false})
+        await Collection.sync({force: false})
+        await Role.sync({force: false})
+        await Type.sync({force: false})
+        await UserAchievement.sync({force: false})
     }
 
     middlewares() {
