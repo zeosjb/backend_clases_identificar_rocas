@@ -3,7 +3,7 @@ const { Router } = require('express')
 const router = Router()
 
 // Controlador
-const { create } = require('../controllers/rock.controller')
+const { create, update, obtain, obtainById, deleteRock } = require('../controllers/rock.controller')
 
 // Agregar una nueva roca
 router.post('/agregar', create)

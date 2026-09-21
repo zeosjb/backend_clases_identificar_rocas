@@ -25,6 +25,7 @@ class Server {
         this.paths = {
             // A integración en la siguiente clase
             user: '/api/user'
+            ,rock: '/api/rock'
         }
 
         // Conexión con la base de datos
@@ -69,6 +70,7 @@ class Server {
 
     routes() {
         this.app.use(this.paths.user, require('./routes/user.route'))
+        this.app.use(this.paths.rock, require('./routes/rock.route'))
     }
 
     listen() {
