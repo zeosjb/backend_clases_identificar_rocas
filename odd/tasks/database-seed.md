@@ -25,6 +25,7 @@ The previous `npm start` target was `src/app.js`, which only exports the Express
 - [x] Tests prove seed idempotency and startup ordering without mutating actual SQLite.
 - [x] README explains database behavior.
 - [x] Verification evidence is recorded.
+- [x] Work-unit commit: `2885090` (`fix(db): seed empty SQLite database safely`).
 
 ## Tasks
 - [x] DB-1 Fix package/server startup integration and deterministic DB path.
@@ -48,7 +49,7 @@ The previous `npm start` target was `src/app.js`, which only exports the Express
 - Isolated real SQLite smoke (unique generated `DATABASE_NAME`): authenticate/sync/seed yielded Type=3, Category=4, Role=2, Achievement=2, Rock=4; second seed kept all counts unchanged. Closed the connection and removed only the exact generated file after validating its path; confirmed absent afterward.
 
 ## Next step
-- Parent agent to record the final work-unit commit after verification.
+- Completed as `2885090`; no push or PR.
 
 ## Relevant files
 - `package.json` — server as package entry and start target.
