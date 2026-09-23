@@ -147,3 +147,11 @@ Implementa `GET /api/rock/dureza?min=5&max=7` y responde con una lista de rocas 
 - Actualiza esta sección con un ejemplo `curl` y la forma de la respuesta cuando termines.
 
 **Pista:** `src/routes/rock.route.js` ya muestra cómo declarar rutas específicas antes de las rutas CRUD genéricas; `src/services/crudService.js` y `src/utils/queryOptions.js` sirven como referencias para mantener cada responsabilidad en su capa.
+
+## SQLite: ubicación y datos de demostración
+
+Al ejecutar `npm start`, el proceso inicia `src/server.js`: autentica la conexión, crea las tablas faltantes con Sequelize, carga datos de demostración y recién entonces levanta Express (que se construye mediante `createApp` en `src/app.js`). Si falla cualquiera de esos pasos, el proceso termina con error en vez de anunciar que la API está lista.
+
+Por defecto, la base es `src/database/rock.sqlite`, independiente de la carpeta desde la que se invoque Node. `DATABASE_NAME` cambia el nombre del archivo en esa misma carpeta; solo acepta letras, números, guiones y guiones bajos. No se ejecuta `force: true` ni se borra el archivo existente.
+
+En la primera ejecución, el seeder agrega solo registros que faltan: tipos, categorías, roles de Estudiante/Docente, dos logros y cuatro rocas de ejemplo (basalto, granito, arenisca y pizarra). Para detectar filas existentes usa nombres estables o `scientificName`; nunca reemplaza valores que ya editaste. En reinicios no duplica los ejemplos. La siembra es inicialización didáctica, no reconocimiento por imagen ni un modelo de aprendizaje automático. Para una base nueva sin los ejemplos, configura otro `DATABASE_NAME`; conserva el archivo anterior si necesitas sus datos.
