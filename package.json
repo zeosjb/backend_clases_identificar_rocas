@@ -2,7 +2,7 @@
   "name": "backend_clases",
   "version": "1.0.0",
   "description": "Backend de una app para el reconocimiento de rocas.",
-  "main": "./src/app.js",
+  "main": "./src/server.js",
   "scripts": {
     "dev": "nodemon",
     "start": "node src/server.js",
