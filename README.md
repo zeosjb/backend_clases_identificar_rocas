@@ -1,6 +1,6 @@
-# API educativa de identificación de rocas
+# API de identificación de rocas
 
-Esta API permite administrar un catálogo de rocas y datos relacionados. También incluye una demostración de búsqueda textual para orientar una identificación a partir de propiedades escritas. **No procesa imágenes ni contiene un modelo de inteligencia artificial o machine learning.**
+Esta API permite administrar un catálogo de rocas y datos relacionados. También incluye una demostración de búsqueda textual para orientar una identificación de rocas.
 
 ## Inicio rápido
 
@@ -121,6 +121,7 @@ Los modelos Sequelize corresponden a las entidades `Achievement`, `Analysis`, `C
 ## Pruebas
 
 `npm test` corre las pruebas integradas con `node:test`. Cubren validación/paginación/búsqueda y el comportamiento CRUD del servicio, incluidos campos inmutables y registros inexistentes. Agrega pruebas al introducir nuevas reglas de dominio para mantener claro qué garantiza cada capa.
+
 # Corrección de claves compuestas
 
 `UserAchievement` tiene clave primaria compuesta `(userId, achievementId)`. Para un registro individual se requieren ambas claves en la ruta:
@@ -135,8 +136,7 @@ No se cambió política de autenticación para Analysis o Collection.
 
 ## Desafío para la clase de hoy: encontrar rocas por dureza
 
-**Objetivo:** agregar un filtro numérico para que una persona pueda buscar rocas dentro de un rango de dureza de Mohs. Este endpoint es un ejercicio nuevo; todavía no está implementado.
-
+**Objetivo:** agregar un filtro numérico para que una persona pueda buscar rocas dentro de un rango de dureza de Mohs
 Implementa `GET /api/rock/dureza?min=5&max=7` y responde con una lista de rocas cuya dureza esté entre ambos límites, inclusive. Trabaja por capas: define la ruta, delega la lógica al servicio y deja que el controlador traduzca el resultado a una respuesta HTTP. No pongas consultas ni reglas de negocio directamente en la ruta.
 
 **Criterios de aceptación**
@@ -147,5 +147,3 @@ Implementa `GET /api/rock/dureza?min=5&max=7` y responde con una lista de rocas 
 - Actualiza esta sección con un ejemplo `curl` y la forma de la respuesta cuando termines.
 
 **Pista:** `src/routes/rock.route.js` ya muestra cómo declarar rutas específicas antes de las rutas CRUD genéricas; `src/services/crudService.js` y `src/utils/queryOptions.js` sirven como referencias para mantener cada responsabilidad en su capa.
-
-**Fuera de alcance:** no se necesita machine learning ni reconocimiento por imagen. El objetivo es practicar validación, consultas Sequelize, capas y pruebas automatizadas.
