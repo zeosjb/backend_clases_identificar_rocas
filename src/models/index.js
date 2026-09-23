@@ -1,43 +1,13 @@
-'use strict';
+const User = require('./user')
+const Rock = require('./rock')
+const Achievement = require('./achievement')
+const Analysis = require('./analysis')
+const Category = require('./category')
+const Collection = require('./collection')
+const Role = require('./role')
+const Type = require('./type')
+const UserAchievement = require('./userAchievement')
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const process = require('process');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.js')[env];
-const db = {};
-
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config);
-}
-
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-module.exports = db;
+const models = { User, Rock, Achievement, Analysis, Category, Collection, Role, Type, UserAchievement }
+for (const model of Object.values(models)) if (model.associate) model.associate(models)
+module.exports = { ...models, sequelize: require('../config/database') }

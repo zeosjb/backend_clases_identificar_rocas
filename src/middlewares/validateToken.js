@@ -12,7 +12,7 @@ const validateToken = async (req, res = response, next) => {
         })
     }
 
-    const [scheme, token] = authHeader(' ')
+    const [scheme, token] = authHeader.split(' ')
 
     if (scheme !== 'Bearer' || !token) {
         return res.status(401).json({
@@ -21,7 +21,7 @@ const validateToken = async (req, res = response, next) => {
     }
     try {
         // Ocupar función obtainToken
-        const { id } = jwt.verify(token, process.env.JWT_SECRET)
+        const { id } = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-change-me')
         const user = await User.findByPk(id)
 
         if(!user || user.deletedAt) {

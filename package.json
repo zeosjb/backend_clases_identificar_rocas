@@ -5,8 +5,9 @@
   "main": "./src/app.js",
   "scripts": {
     "dev": "nodemon",
-    "start": "node",
-    "migrate": "npx sequelize-cli db:migrate"
+    "start": "node src/server.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "test": "node --test test/*.test.js"
   },
   "author": "Jose Benitez",
   "license": "ISC",
