@@ -24,7 +24,8 @@ The app previously put validation and persistence inside controllers, did not aw
 - [x] Password hashing and JSON secrecy retained; token middleware Bearer parsing corrected.
 - [x] Tests cover pagination, field whitelist, immutable CRUD data, missing records and password secrecy.
 - [x] Spanish README explains setup, API, layer responsibilities, functions/classes/models, data flow and tests.
-- [ ] Commit/review evidence: pending parent coordination.
+- [x] Work-unit commit: `af33ca1` (`feat(api): expand rock recognition CRUD`).
+- [x] RDD remains clone-local off (`disabled/unmanaged`); risk assessment was unassessable due repository identity access, so a fresh verifier was used and one confirmed composite-key defect corrected.
 
 ## Tasks
 - [x] API-1 Establish the shared CRUD/test foundation and association initialization (confirmed as part of current implementation).
@@ -35,17 +36,17 @@ The app previously put validation and persistence inside controllers, did not aw
 - Uses explicit model imports and invokes model associations rather than a Sequelize CLI factory loader (the model files export initialized classes).
 - Startup is now async and refuses to listen until DB authentication/sync succeeds.
 - Existing legacy user endpoints remain; standard CRUD paths added for other non-User entities.
-- npm CLI is broken on this machine (npm exec` / npm test` cannot load npm-cli.js), although direct node --test` works.
+- npm CLI is broken on this machine (`npm exec` / `npm test` cannot load npm-cli.js), although direct `node --test` works.
 
 ## Verification evidence
-- node --test test/*.test.js`: 7 passed, 0 failed.
-- node -c` on app, server, model index, rock route and CRUD controller: passed.
+- `node --test test/*.test.js`: 7 passed, 0 failed.
+- `node -c` on app, server, model index, rock route and CRUD controller: passed.
 - Import smoke: all nine models load, Rock.category and User.role associations exist, `createApp()` succeeds.
 - `git diff --check`: no whitespace errors after trimming EOFs; only Git line-ending warnings observed.
-- npm test`: blocked by host npm installation (`Cannot find module ... npm-cli.js`), not project tests.
+- `npm test`: blocked by host npm installation (`Cannot find module ... npm-cli.js`), not project tests.
 
 ## Next step
-Parent to inspect integration/diff, decide commit and native review according to repo workflow. Avoid writing to or cleaning `.atl/`.
+Completed: API work committed as `af33ca1`; no push or PR. `.atl/` was preserved.
 
 ## Corrección de clave compuesta
 
@@ -55,7 +56,7 @@ Parent to inspect integration/diff, decide commit and native review according to
 - No se modificaron reglas de autorización de Analysis/Collection.
 
 ## Verificación de corrección
-- node --test test/compositeCrud.test.js`: 2 passed; covers both key fields for get/update/delete, immutable-key sanitization and registered paths.
-- node --test test/*.test.js`: 7 passed, 0 failed.
-- node -c` on changed service/controller/router/app: passed.
+- `node --test test/compositeCrud.test.js`: 2 passed; covers both key fields for get/update/delete, immutable-key sanitization and registered paths.
+- `node --test test/*.test.js`: 7 passed, 0 failed.
+- `node -c` on changed service/controller/router/app: passed.
 - `git diff --check`: passed after EOF cleanup; only line-ending warnings.
