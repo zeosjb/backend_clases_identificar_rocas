@@ -132,3 +132,20 @@ Los modelos Sequelize corresponden a las entidades `Achievement`, `Analysis`, `C
 La creación/listado siguen en `POST /api/user-achievement` y `GET /api/user-achievement`. Ejemplo: `GET /api/user-achievement/7/3` recupera el logro 3 del usuario 7; `PATCH` solo puede cambiar `rockId`, no la identidad de la asociación. `DELETE` elimina exactamente esa unión.
 
 No se cambió política de autenticación para Analysis o Collection.
+
+## Desafío para la clase de hoy: encontrar rocas por dureza
+
+**Objetivo:** agregar un filtro numérico para que una persona pueda buscar rocas dentro de un rango de dureza de Mohs. Este endpoint es un ejercicio nuevo; todavía no está implementado.
+
+Implementa `GET /api/rock/dureza?min=5&max=7` y responde con una lista de rocas cuya dureza esté entre ambos límites, inclusive. Trabaja por capas: define la ruta, delega la lógica al servicio y deja que el controlador traduzca el resultado a una respuesta HTTP. No pongas consultas ni reglas de negocio directamente en la ruta.
+
+**Criterios de aceptación**
+
+- `min` y `max` son obligatorios, numéricos y no negativos; si falta uno o el rango es inválido (`min > max`), responde `400` con un mensaje claro.
+- Una búsqueda válida devuelve `200` y solo incluye rocas con `hardness >= min` y `hardness <= max`.
+- Agrega pruebas para: resultados dentro y fuera del rango, límites inclusivos y entradas inválidas.
+- Actualiza esta sección con un ejemplo `curl` y la forma de la respuesta cuando termines.
+
+**Pista:** `src/routes/rock.route.js` ya muestra cómo declarar rutas específicas antes de las rutas CRUD genéricas; `src/services/crudService.js` y `src/utils/queryOptions.js` sirven como referencias para mantener cada responsabilidad en su capa.
+
+**Fuera de alcance:** no se necesita machine learning ni reconocimiento por imagen. El objetivo es practicar validación, consultas Sequelize, capas y pruebas automatizadas.
