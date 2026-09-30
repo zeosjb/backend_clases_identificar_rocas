@@ -12,11 +12,17 @@ const referenceData = {
   ],
   Role: [
     { name: 'Estudiante' },
-    { name: 'Docente' }
+    { name: 'Docente' },
+    { name: 'Admin' },
+    { name: 'Usuario autenticado' }
   ],
   Achievement: [
     { slug: 'primera-roca', name: 'Primera roca', description: 'Explora una roca del catalogo.', experience: 10 },
-    { slug: 'catalogo-inicial', name: 'Catalogo inicial', description: 'Consulta varias rocas del catalogo.', experience: 25 }
+    { slug: 'catalogo-inicial', name: 'Catalogo inicial', description: 'Consulta varias rocas del catalogo.', experience: 25 },
+    // Automatic achievements evaluated after every recognition (see achievementService).
+    { slug: 'first-discovery', name: 'Primer descubrimiento', description: 'Identifica tu primera roca.', experience: 10, conditionType: 'distinct_rocks', conditionValue: 1 },
+    { slug: 'rock-explorer', name: 'Explorador de rocas', description: 'Descubre 3 rocas distintas.', experience: 25, conditionType: 'distinct_rocks', conditionValue: 3 },
+    { slug: 'dedicated-identifier', name: 'Identificador dedicado', description: 'Realiza 10 reconocimientos.', experience: 50, conditionType: 'total_recognitions', conditionValue: 10 }
   ]
 }
 

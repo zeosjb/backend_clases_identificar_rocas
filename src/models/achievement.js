@@ -29,6 +29,22 @@ Achievement.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: false
+    },
+    // Unlock rule: `conditionType` reached `conditionValue`. Null means the achievement is not evaluated automatically.
+    conditionType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: { isIn: [['distinct_rocks', 'total_recognitions']] }
+    },
+    conditionValue: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        validate: { min: 1 }
+    },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 }, {
     sequelize: db,

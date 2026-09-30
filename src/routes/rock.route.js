@@ -2,6 +2,7 @@ const { Router } = require('express')
 const models = require('../models')
 const createCrudRouter = require('./crud.route')
 const { buildListOptions } = require('../utils/queryOptions')
+const { adminOnly } = require('../middlewares/guards')
 const router = Router()
 // Demostración educativa: búsqueda textual sobre campos observables; no ejecuta reconocimiento por imagen.
 router.get('/identificar', async (req, res, next) => {
@@ -12,5 +13,5 @@ router.get('/identificar', async (req, res, next) => {
     return res.json({ query, method: 'text-match', total: result.count, rocks: result.rows })
   } catch (error) { return next(error) }
 })
-router.use('/', createCrudRouter(models.Rock, { name: 'Roca', searchableFields: ['name', 'scientificName', 'composition', 'formula', 'environment', 'commonUses', 'hardness', 'streak', 'color', 'texture'] }))
+router.use('/', createCrudRouter(models.Rock, { name: 'Roca', searchableFields: ['name', 'scientificName', 'composition', 'formula', 'environment', 'commonUses', 'hardness', 'streak', 'color', 'texture'], writeMiddlewares: adminOnly }))
 module.exports = router

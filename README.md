@@ -20,6 +20,25 @@ La primera conexión crea las tablas que faltan en SQLite. El servidor solo comi
 | `DATABASE_NAME` | Nombre del archivo SQLite, dentro de `src/database` | `rock` |
 | `JWT_SECRET` | Secreto para firmar y verificar tokens | valor aleatorio privado |
 | `JWT_EXPIRES_IN` | Duración del token al iniciar sesión | `1d` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_USERNAME` | Cuenta de administrador creada al arrancar si no existe | `admin@example.test` / contraseña propia / `admin` |
+| `GUEST_SESSION_TTL_HOURS` | Vigencia de una sesión de invitado | `72` |
+
+Ejemplo de `.env` (sin credenciales reales):
+
+```dotenv
+PORT=8080
+DATABASE_NAME=rock
+JWT_SECRET=change-me-to-a-long-random-string
+JWT_EXPIRES_IN=1d
+ADMIN_EMAIL=admin@example.test
+ADMIN_PASSWORD=change-this-password
+ADMIN_USERNAME=admin
+GUEST_SESSION_TTL_HOURS=72
+```
+
+> TODO(student): la cátedra pide un archivo `.env.example` en el repositorio con este contenido. Créalo y no subas tu `.env` real.
+
+Sin `ADMIN_EMAIL`/`ADMIN_PASSWORD` se usa un valor de desarrollo (`admin@example.test` / `ChangeMe123!`); con `NODE_ENV=production` el servidor exige `ADMIN_PASSWORD`. El seeder nunca sobrescribe un administrador existente.
 
 No publiques secretos en Git. El fallback JWT existe solo para facilitar la demostración local y debe reemplazarse en despliegues.
 
@@ -53,7 +72,7 @@ Todos los recursos genéricos aceptan `GET /`, `POST /`, `GET /:id`, `PATCH /:id
 | Análisis | `/api/analysis` | Registro asociado a usuario y roca; no representa predicción ML |
 | Colecciones | `/api/collection` | Asociación usuario-roca |
 | Logros de usuario | `/api/user-achievement` | Unión usuario-logro |
-| Usuarios | `/api/user` | Solo registro e inicio de sesión; no expone CRUD de contraseñas |
+| Usuarios | `/api/user` | Registro, inicio de sesión, perfil propio y listado para Admin; no expone CRUD de contraseñas |
 
 ### Consultas y ejemplo
 
@@ -90,9 +109,21 @@ Los campos obligatorios adicionales dependen de cada modelo y los IDs referencia
 
 ### Registro e inicio de sesión
 
-- `POST /api/user/registro`: `userName`, `email`, `password` (mínimo 8 caracteres) y `roleId` son obligatorios; `phone` es opcional. La contraseña se transforma con bcrypt antes de persistir.
-- `POST /api/user/login`: recibe `email` y `password`; devuelve un JWT.
-- `src/middlewares/validateToken.js`: middleware Bearer disponible para rutas que deban protegerse. Comprueba firma, vencimiento y existencia del usuario. No se aplica automáticamente a CRUDs: esta versión es un proyecto didáctico abierto y no implementa autorización por rol.
+- `POST /api/user/registro`: `userName`, `email` y `password` (mínimo 8 caracteres) son obligatorios; `phone` es opcional. La contraseña se transforma con bcrypt antes de persistir. **El rol siempre es `Usuario autenticado`**: un `roleId` enviado por el cliente se ignora, así nadie puede autoasignarse privilegios.
+- `POST /api/user/login`: recibe `email` y `password`; devuelve un JWT. Las cuentas con `status: "blocked"` reciben `403`.
+- `GET /api/user/me` y `PATCH /api/user/me` (Bearer): perfil propio; solo se puede editar `userName` y `phone` (nunca rol ni estado).
+- `GET /api/user` y `GET /api/user/:id` (solo Admin): consulta de usuarios registrados.
+- `src/middlewares/validateToken.js`: middleware Bearer (`validateToken.optional` deja pasar peticiones anónimas). Comprueba firma, vencimiento, existencia y estado activo del usuario y carga su rol.
+- `src/middlewares/authorizeRoles.js`: `authorizeRoles('Admin')` responde `403` si el rol no está permitido. `src/middlewares/guards.js` exporta las cadenas listas `adminOnly` y `authenticated`.
+
+### Roles y permisos
+
+| Recurso | Anónimo / invitado | Usuario autenticado | Admin |
+|---|---|---|---|
+| Catálogo (`rock`, `type`, `category`, `achievement`) lectura | sí | sí | sí |
+| Catálogo escritura (POST/PATCH/DELETE) | `401` | `403` | sí |
+| `role`, `analysis`, `collection`, `user-achievement` (CRUD crudo) | `401` | `403` | sí |
+| `/api/user` (listado) | `401` | `403` | sí |
 - `User.prototype.toJSON`: elimina `password` de las respuestas serializadas.
 
 ## Clases, funciones y modelos
