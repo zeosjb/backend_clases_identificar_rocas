@@ -12,6 +12,9 @@ const createApp = () => {
   if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'))
   app.use('/api/user', require('./routes/user.route'))
   app.use('/api/rock', require('./routes/rock.route'))
+  app.use('/api/guest', require('./routes/guest.route'))
+  app.use('/api/recognition', require('./routes/recognition.route'))
+  app.use('/api/collection', require('./routes/collection.route'))
   // Reference data is public to read and admin-only to change; roles and raw records are admin-only.
   const { createTaxonomyRouter } = require('./routes/taxonomy.route')
   app.use('/api/category', createTaxonomyRouter(models.Category, { name: 'Categoría', foreignKey: 'categoryId', searchableFields: ['name', 'description'], allowedFields: ['name', 'description'] }))

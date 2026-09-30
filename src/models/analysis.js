@@ -10,9 +10,14 @@ class Analysis extends Model {
 }
 
 Analysis.init({
+    // Exactly one owner: a registered user or a guest session (checked by `hasOneOwner` below).
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
+    },
+    guestSessionId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     rockId: {
         type: DataTypes.INTEGER,
@@ -20,13 +25,15 @@ Analysis.init({
     },
     image_url: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: false
     },
+    // Model confidence as a percentage (0-100).
     confidence: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        unique: false
+        unique: false,
+        validate: { min: 0, max: 100 }
     },
     result: {
         type: DataTypes.STRING,
@@ -35,7 +42,7 @@ Analysis.init({
     },
     note: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: false
     }
 }, {
@@ -43,11 +50,17 @@ Analysis.init({
     modelName: 'Analysis',
     tableName: 'analysis',
     timestamps: true,
-    paranoid: true
+    paranoid: true,
+    validate: {
+        hasOneOwner() {
+            if ((this.userId == null) === (this.guestSessionId == null)) throw new Error('Analysis needs exactly one owner: userId or guestSessionId')
+        }
+    }
 })
 
 Analysis.associate = (models) => {
     Analysis.belongsTo(models.User, { foreignKey: 'userId', as: 'user' })
+    Analysis.belongsTo(models.GuestSession, { foreignKey: 'guestSessionId', as: 'guestSession' })
     Analysis.belongsTo(models.Rock, { foreignKey: 'rockId', as: 'rock' })
 }
 

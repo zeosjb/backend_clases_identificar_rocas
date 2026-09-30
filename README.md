@@ -111,6 +111,42 @@ Los campos obligatorios adicionales dependen de cada modelo y los IDs referencia
 - Validaciones de roca: campos obligatorios, `hardness` entre 1 y 10 (escala de Mohs), `typeId`/`categoryId` existentes y `scientificName`/`index` únicos. Solo se aceptan los campos del catálogo (lista blanca).
 - Las escrituras del catálogo requieren rol Admin (ver matriz de roles).
 
+### Invitados, reconocimientos, colección y logros
+
+El modelo de reconocimiento se integrará después mediante una API externa: el backend recibe **el JSON que entregaría el modelo** (`rockId`, `confidence`) y se encarga de registrar, limitar y premiar. No clasifica imágenes.
+
+| Endpoint | Quién | Descripción |
+|---|---|---|
+| `POST /api/guest/session` | anónimo | Crea una sesión temporal y devuelve `token` (una sola vez), `limit`, `remaining`, `expiresAt`. |
+| `GET /api/guest/session` | invitado (`X-Guest-Token`) | Estado de la sesión: `recognitionCount`, `remaining`, `status`. |
+| `POST /api/recognition` | invitado (`X-Guest-Token`) o usuario (Bearer) | Registra un reconocimiento (ver abajo). |
+| `GET /api/collection/me` | usuario | Su colección (`items` con la roca incluida, `total` = rocas distintas descubiertas). |
+| `GET /api/collection/me/:rockId` | usuario | Detalle de una roca descubierta; `404` si no es suya. |
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8080/api/guest/session | node -pe "JSON.parse(require('fs').readFileSync(0)).token")
+curl -X POST http://localhost:8080/api/recognition \
+  -H "Content-Type: application/json" -H "X-Guest-Token: $TOKEN" \
+  -d '{ "rockId": 1, "confidence": 92, "imageUrl": "https://example.org/photo.jpg" }'
+```
+
+```json
+{
+  "analysis": { "id": 1, "guestSessionId": 1, "rockId": 1, "confidence": 92, "result": "Basalto" },
+  "collection": { "rockId": 1, "recognitionCount": 1, "firstDiscoveredAt": "2026-09-30T12:00:00.000Z" },
+  "newDiscovery": true,
+  "unlockedAchievements": [ { "slug": "first-discovery", "name": "Primer descubrimiento", "unlockedAt": "2026-09-30T12:00:00.000Z" } ],
+  "guest": { "status": "active", "recognitionCount": 1, "limit": 10, "remaining": 9 }
+}
+```
+
+Reglas (en `src/services/recognitionService.js`, todo dentro de una transacción):
+
+- Invitado: máximo 10 reconocimientos **por sesión** (no por persona). El 11.º responde `403` con `code: "GUEST_LIMIT_REACHED"` y pide crear una cuenta. Los intentos inválidos no consumen el límite. La sesión guarda solo el hash SHA-256 del token y expira según `GUEST_SESSION_TTL_HOURS`.
+- Usuario autenticado: sin límite.
+- Una roca repetida no duplica la colección: incrementa `recognitionCount` y conserva `firstDiscoveredAt`.
+- Logros automáticos (`src/services/achievementService.js`), definidos por `conditionType` + `conditionValue` en la tabla `achievement`: `first-discovery` (1 roca distinta), `rock-explorer` (3 rocas distintas) y `dedicated-identifier` (10 reconocimientos). Cada logro se desbloquea una sola vez por dueño y guarda `unlockedAt`. Un Admin puede desactivarlos con `PATCH /api/achievement/:id` (`{ "isActive": false }`).
+
 ### Demo de identificación por propiedades
 
 `GET /api/rock/identificar?q=oscuro` busca coincidencias parciales, sin distinguir mayúsculas de minúsculas según el comportamiento de SQLite/LIKE, en propiedades textuales de catálogo (nombre, composición, fórmula, ambiente, usos, color, textura, entre otras). Devuelve `{ query, method: "text-match", total, rocks }`. Es una ayuda educativa de búsqueda, **no identifica muestras ni infiere minerales**.
@@ -130,6 +166,8 @@ Los campos obligatorios adicionales dependen de cada modelo y los IDs referencia
 |---|---|---|---|
 | Catálogo (`rock`, `type`, `category`, `achievement`) lectura | sí | sí | sí |
 | Catálogo escritura (POST/PATCH/DELETE) | `401` | `403` | sí |
+| `POST /api/recognition` | sí (10 por sesión) | sí (sin límite) | sí |
+| `GET /api/collection/me` | `401` | sí (solo la propia) | sí (la propia) |
 | `role`, `analysis`, `collection`, `user-achievement` (CRUD crudo) | `401` | `403` | sí |
 | `/api/user` (listado) | `401` | `403` | sí |
 - `User.prototype.toJSON`: elimina `password` de las respuestas serializadas.

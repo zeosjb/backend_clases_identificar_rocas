@@ -1,10 +1,11 @@
 const { DataTypes, Model } = require('sequelize')
 const db = require('../config/database')
 
-class UserAchievement extends Model {}
+// Achievements unlocked during a guest session (the guest equivalent of UserAchievement).
+class GuestAchievement extends Model {}
 
-UserAchievement.init({
-    userId: {
+GuestAchievement.init({
+    guestSessionId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         allowNull: false
@@ -14,10 +15,6 @@ UserAchievement.init({
         primaryKey: true,
         allowNull: false
     },
-    rockId: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
     unlockedAt: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -25,9 +22,13 @@ UserAchievement.init({
     }
 }, {
     sequelize: db,
-    modelName: 'UserAchievement',
-    tableName: 'user_achievement',
+    modelName: 'GuestAchievement',
+    tableName: 'guest_achievement',
     timestamps: true
 })
 
-module.exports = UserAchievement
+GuestAchievement.associate = (models) => {
+    GuestAchievement.belongsTo(models.Achievement, { foreignKey: 'achievementId', as: 'achievement' })
+}
+
+module.exports = GuestAchievement
