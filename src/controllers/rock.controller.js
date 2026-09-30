@@ -65,7 +65,15 @@ const deleteRock = async (req, res) => {
     return res.json({ message: 'Roca eliminada correctamente' })
 }
 
+// The controller only translates the service result into HTTP; validation and queries live in the service.
+const createRockController = service => ({
+    byHardness: async (req, res, next) => {
+        try { return res.status(200).json(await service.findByHardness(req.query)) } catch (error) { return next(error) }
+    }
+})
+
 module.exports = {
+    createRockController,
     create,
     obtain,
     obtainById,

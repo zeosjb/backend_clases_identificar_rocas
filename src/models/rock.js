@@ -40,7 +40,8 @@ Rock.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: false
+        unique: false,
+        validate: { notEmpty: true }
     },
     scientificName: {
         type: DataTypes.STRING,
@@ -73,7 +74,8 @@ Rock.init({
     },
     hardness: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: { min: 1, max: 10 } // Mohs scale
     },
     streak: {
         type: DataTypes.STRING,

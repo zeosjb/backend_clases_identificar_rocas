@@ -103,6 +103,14 @@ Los listados admiten `page` (desde 1), `limit` (por defecto 20, máximo 100), `s
 
 Los campos obligatorios adicionales dependen de cada modelo y los IDs referenciales deben existir. Sequelize reporta errores de validación y unicidad como `400`.
 
+### Catálogo: filtros, tipos y categorías
+
+- `GET /api/rock?typeId=1&categoryId=2`: filtra por tipo y/o categoría (enteros positivos, si no `400`). Se combina con `search`, `page` y `limit`.
+- `GET /api/type/:id/rocks` y `GET /api/category/:id/rocks`: rocas de un tipo o categoría (`404` si no existe).
+- Los nombres de tipos y categorías son únicos (`400` si se repiten). `DELETE` de un tipo o categoría con rocas asociadas responde `409`.
+- Validaciones de roca: campos obligatorios, `hardness` entre 1 y 10 (escala de Mohs), `typeId`/`categoryId` existentes y `scientificName`/`index` únicos. Solo se aceptan los campos del catálogo (lista blanca).
+- Las escrituras del catálogo requieren rol Admin (ver matriz de roles).
+
 ### Demo de identificación por propiedades
 
 `GET /api/rock/identificar?q=oscuro` busca coincidencias parciales, sin distinguir mayúsculas de minúsculas según el comportamiento de SQLite/LIKE, en propiedades textuales de catálogo (nombre, composición, fórmula, ambiente, usos, color, textura, entre otras). Devuelve `{ query, method: "text-match", total, rocks }`. Es una ayuda educativa de búsqueda, **no identifica muestras ni infiere minerales**.
@@ -178,6 +186,23 @@ Implementa `GET /api/rock/dureza?min=5&max=7` y responde con una lista de rocas 
 - Actualiza esta sección con un ejemplo `curl` y la forma de la respuesta cuando termines.
 
 **Pista:** `src/routes/rock.route.js` ya muestra cómo declarar rutas específicas antes de las rutas CRUD genéricas; `src/services/crudService.js` y `src/utils/queryOptions.js` sirven como referencias para mantener cada responsabilidad en su capa.
+
+**Solución de referencia** (ruta `src/routes/rock.route.js` → `byHardness` en `src/controllers/rock.controller.js` → `findByHardness` en `src/services/rockService.js`; pruebas en `test/rockHardness.test.js`):
+
+```bash
+curl "http://localhost:8080/api/rock/dureza?min=5&max=7"
+```
+
+```json
+{
+  "min": 5,
+  "max": 7,
+  "total": 3,
+  "rocks": [ { "id": 1, "name": "Basalto", "hardness": 6 } ]
+}
+```
+
+Una consulta inválida responde `400`, por ejemplo `GET /api/rock/dureza?min=8&max=5` → `{ "message": "min no puede ser mayor que max" }`. Faltan parámetros: `Los parámetros min y max son obligatorios`; valores no numéricos o negativos: `min y max deben ser numéricos y no negativos`.
 
 ## SQLite: ubicación y datos de demostración
 

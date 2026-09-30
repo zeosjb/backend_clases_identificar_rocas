@@ -11,7 +11,8 @@ Category.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: false
+        unique: true,
+        validate: { notEmpty: true }
     },
     description: {
         type: DataTypes.STRING,

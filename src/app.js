@@ -13,9 +13,10 @@ const createApp = () => {
   app.use('/api/user', require('./routes/user.route'))
   app.use('/api/rock', require('./routes/rock.route'))
   // Reference data is public to read and admin-only to change; roles and raw records are admin-only.
+  const { createTaxonomyRouter } = require('./routes/taxonomy.route')
+  app.use('/api/category', createTaxonomyRouter(models.Category, { name: 'Categoría', foreignKey: 'categoryId', searchableFields: ['name', 'description'], allowedFields: ['name', 'description'] }))
+  app.use('/api/type', createTaxonomyRouter(models.Type, { name: 'Tipo', foreignKey: 'typeId', searchableFields: ['name'], allowedFields: ['name'] }))
   const resources = {
-    category: [models.Category, 'Categoría', ['name', 'description'], { writeMiddlewares: adminOnly }],
-    type: [models.Type, 'Tipo', ['name'], { writeMiddlewares: adminOnly }],
     role: [models.Role, 'Rol', ['name'], { readMiddlewares: adminOnly, writeMiddlewares: adminOnly }],
     achievement: [models.Achievement, 'Logro', ['name', 'slug', 'description'], { writeMiddlewares: adminOnly }],
     analysis: [models.Analysis, 'Análisis', ['result', 'note'], { readMiddlewares: adminOnly, writeMiddlewares: adminOnly }],
