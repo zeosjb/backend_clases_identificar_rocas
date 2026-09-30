@@ -248,4 +248,47 @@ Al ejecutar `npm start`, el proceso inicia `src/server.js`: autentica la conexi�
 
 Por defecto, la base es `src/database/rock.sqlite`, independiente de la carpeta desde la que se invoque Node. `DATABASE_NAME` cambia el nombre del archivo en esa misma carpeta; solo acepta letras, números, guiones y guiones bajos. No se ejecuta `force: true` ni se borra el archivo existente.
 
-En la primera ejecución, el seeder agrega solo registros que faltan: tipos, categorías, roles de Estudiante/Docente, dos logros y cuatro rocas de ejemplo (basalto, granito, arenisca y pizarra). Para detectar filas existentes usa nombres estables o `scientificName`; nunca reemplaza valores que ya editaste. En reinicios no duplica los ejemplos. La siembra es inicialización didáctica, no reconocimiento por imagen ni un modelo de aprendizaje automático. Para una base nueva sin los ejemplos, configura otro `DATABASE_NAME`; conserva el archivo anterior si necesitas sus datos.
+En la primera ejecución, el seeder agrega solo registros que faltan: tipos, categorías, roles (Admin, Usuario autenticado, Estudiante y Docente), cinco logros (tres automáticos con condición, ver más arriba), cuatro rocas de ejemplo (basalto, granito, arenisca y pizarra) y la cuenta de administrador definida por `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
+
+> **Cambio de esquema:** esta versión agrega tablas y columnas (`guest_session`, `guest_achievement`, `status` en usuarios, condiciones en logros, `firstDiscoveredAt` en colecciones, etc.). Sequelize no altera tablas existentes al arrancar. Si ya tenías un `src/database/rock.sqlite` de versiones anteriores (está ignorado por Git y es descartable), bórralo o usa otro `DATABASE_NAME` para que se cree con el esquema nuevo. Para detectar filas existentes usa nombres estables o `scientificName`; nunca reemplaza valores que ya editaste. En reinicios no duplica los ejemplos. La siembra es inicialización didáctica, no reconocimiento por imagen ni un modelo de aprendizaje automático. Para una base nueva sin los ejemplos, configura otro `DATABASE_NAME`; conserva el archivo anterior si necesitas sus datos.
+
+## Guía para estudiantes (Cátedra I)
+
+Este repositorio implementa aproximadamente el 70 % de los requisitos de la Cátedra I como **referencia de arquitectura**: estudia cómo cada funcionalidad recorre `ruta → controlador → servicio → modelo` y replica el patrón en lo pendiente. El resto (~30 %) está marcado con `TODO(student)` en el código, responde `501` y tiene pruebas `test.todo`.
+
+### Ya implementado (úsalo como modelo)
+
+| Requisito | Dónde mirar |
+|---|---|
+| Registro, login, JWT, hash bcrypt, sin contraseñas en respuestas | `src/controllers/user.controller.js`, `src/models/user.js` |
+| Roles, `authorizeRoles`, rutas privadas, admin sin autoasignación | `src/middlewares/*`, `test/auth.test.js` |
+| Seeders: roles, administrador, tipos, categorías, rocas, logros | `src/database/seedDemoData.js`, `src/database/seedAdmin.js` |
+| CRUD de rocas, filtros por tipo/categoría, validaciones, dureza | `src/routes/rock.route.js`, `src/services/rockService.js` |
+| Tipos y categorías únicos, bloqueo de borrado con rocas, rocas por tipo/categoría | `src/routes/taxonomy.route.js` |
+| Sesiones de invitado con token difícil de adivinar y límite de 10 | `src/services/guestSessionService.js` |
+| Reconocimiento (resultado simulado del modelo), historial (`Analysis`) | `src/services/recognitionService.js` |
+| Colección personal sin duplicados, contador y primera fecha | `src/services/collectionService.js`, `src/models/collection.js` |
+| 3 logros automáticos sin repetición, con fecha de desbloqueo | `src/services/achievementService.js` |
+| Documentación, ejemplo de `.env`, pruebas de integración | este README, `test/helpers/testApp.js` |
+
+### Pendiente (tu trabajo)
+
+Cada punto tiene una ruta ya protegida en `src/routes/pending.route.js` con un comentario `TODO(student)` que explica reglas y pistas, y una prueba `test.todo` en `test/pendingStudent.test.js`.
+
+- [ ] Progreso y estadísticas individuales: `GET /api/progress/me` (reconocimientos, rocas distintas, logros, % de descubrimiento) y `GET /api/progress/me/history`.
+- [ ] Logros bloqueados/desbloqueados: `GET /api/achievement/me`.
+- [ ] Retroalimentación: modelo `Feedback` y `POST|GET|PATCH /api/recognition/:id/feedback` (una por reconocimiento, solo del dueño).
+- [ ] Migración de invitado a cuenta: `POST /api/guest/migrate` (transferir colección y logros, invalidar la sesión, evitar doble transferencia).
+- [ ] Administración de usuarios: `PATCH /api/admin/users/:id` (rol y estado; el login ya rechaza cuentas `blocked`).
+- [ ] Estadísticas globales: `GET /api/admin/stats` (usuarios, rocas más reconocidas, total de reconocimientos).
+- [ ] Historial y retroalimentación globales: `GET /api/admin/recognitions`, `GET /api/admin/feedback`.
+- [ ] Colección y logros de cualquier usuario: `GET /api/admin/users/:id/collection` y `/achievements`.
+- [ ] Crear `.env.example` en el repositorio (sin credenciales reales).
+
+### Cómo trabajar cada punto
+
+1. Convierte el `test.todo` correspondiente en una prueba real que falle (usa `test/helpers/testApp.js`, que levanta la API sobre una base SQLite temporal).
+2. Implementa servicio y controlador; reemplaza `notImplemented(...)` en `pending.route.js` y borra esa ruta de la prueba de andamiaje.
+3. Ejecuta `npm test` y marca el punto en esta lista.
+
+Los límites de sesión de invitado son por sesión, no por persona; no lo presentes como una garantía. El "reconocimiento" recibe un JSON simulado del modelo: no hay clasificación de imágenes en este backend.
